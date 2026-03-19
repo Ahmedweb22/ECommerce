@@ -1,0 +1,9 @@
+﻿global using E_Commerce.Models;
+global using E_Commerce.DataAccess;
+global using E_Commerce.ViewModels;
+global using Microsoft.EntityFrameworkCore;
+global using E_Commerce.Utilities;
+global using System.ComponentModel.DataAnnotations;
+global using E_Commerce.ValidationAttributes;
+global using E_Commerce.Repositories;
+global using E_Commerce.Repositories.IRepositories;
