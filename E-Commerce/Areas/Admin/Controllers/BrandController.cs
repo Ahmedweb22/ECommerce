@@ -55,6 +55,7 @@ namespace E_Commerce.Areas.Admin.Controllers
           
          await  _brandRepository.CreateAsync(brand);
          await _brandRepository.CommitAsync();
+            TempData["Notification"] = "Brand created successfully";
 
             return RedirectToAction(nameof(Index));
         }
@@ -94,6 +95,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             }
            _brandRepository.Update(brand);
               await _brandRepository.CommitAsync();
+            TempData["Notification"] = "Brand updated successfully";
             return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> Delete([FromRoute] int id)
@@ -108,6 +110,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             }
            _brandRepository.Delete(brand);
            await _brandRepository.CommitAsync();
+            TempData["Notification"] = "Brand deleted successfully";
             return RedirectToAction(nameof(Index));
         }
 

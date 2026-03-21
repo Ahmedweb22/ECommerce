@@ -4,11 +4,11 @@ namespace E_Commerce.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        private ApplicationDbContext _context = new();
+        private ApplicationDbContext _context;
         private DbSet<T> _dbset;
-        public Repository()
+        public Repository(ApplicationDbContext context)
         {
-         
+            _context = context;
             _dbset = _context.Set<T>();
         }
         public async Task CreateAsync(T entity)

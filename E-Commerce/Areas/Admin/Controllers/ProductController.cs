@@ -123,6 +123,8 @@ namespace E_Commerce.Areas.Admin.Controllers
                 }
                await _productSubImgRepository.CommitAsync();
             }
+            TempData["Notification"] = "Product created successfully";
+
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
@@ -209,7 +211,9 @@ namespace E_Commerce.Areas.Admin.Controllers
                  _productSubImgRepository.DeleteRange(oldSubImgs);
                 await _productSubImgRepository.CommitAsync();
             }
-return RedirectToAction(nameof(Index));
+            TempData["Notification"] = "Product updated successfully";
+
+            return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> DeleteImg([FromRoute] int id, [FromQuery] int productImgId)
         {
@@ -223,6 +227,8 @@ return RedirectToAction(nameof(Index));
             }
             _productSubImgRepository.Delete(subImg);
             await _productSubImgRepository.CommitAsync();
+            TempData["Notification"] = "Sub image deleted successfully";
+
             return RedirectToAction(nameof(Edit), new { id });
         }
         public async Task<IActionResult> Delete(int id)
@@ -251,6 +257,8 @@ return RedirectToAction(nameof(Index));
             //Step4: Delete product from DB
             _productRepository.Delete(product);
             await _productRepository.CommitAsync();
+            TempData["Notification"] = "Product deleted successfully";
+
             return RedirectToAction(nameof(Index));
         }
     }

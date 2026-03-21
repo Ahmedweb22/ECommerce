@@ -9,12 +9,14 @@ namespace E_Commerce.Areas.Customer.Controllers
     [Area(SD.CUSTOMER_AREA)]
     public class HomeController : Controller
     {
-        private ApplicationDbContext _context = new ApplicationDbContext();
+        private ApplicationDbContext _context;
+
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index(int? categoryId)

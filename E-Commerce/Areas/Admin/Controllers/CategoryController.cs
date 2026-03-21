@@ -44,6 +44,7 @@ namespace E_Commerce.Areas.Admin.Controllers
            
             await _repository.CreateAsync(catgeory);
             await _repository.CommitAsync();
+            TempData["Notification"] = "Category created successfully";
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
@@ -63,6 +64,7 @@ namespace E_Commerce.Areas.Admin.Controllers
            
             _repository.Update(catgeory);
             await _repository.CommitAsync();
+                TempData["Notification"] = "Category updated successfully";
             return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> Delete([FromRoute] int id)
@@ -72,6 +74,7 @@ namespace E_Commerce.Areas.Admin.Controllers
                 return NotFound();
             _repository.Delete(category);
             await _repository.CommitAsync();
+                TempData["Notification"] = "Category deleted successfully";
             return RedirectToAction(nameof(Index));
         }
     }
