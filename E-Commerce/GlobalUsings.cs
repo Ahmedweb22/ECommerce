@@ -7,3 +7,5 @@ global using System.ComponentModel.DataAnnotations;
 global using E_Commerce.ValidationAttributes;
 global using E_Commerce.Repositories;
 global using E_Commerce.Repositories.IRepositories;
+global using E_Commerce.Services;
+global using E_Commerce.Services.IServices;

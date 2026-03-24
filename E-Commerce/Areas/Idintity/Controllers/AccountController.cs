@@ -10,12 +10,22 @@ namespace E_Commerce.Areas.Idintity.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
-
-        public AccountController(UserManager<ApplicationUser> userManager , SignInManager<ApplicationUser> signInManager , IEmailSender emailSender)
+        private readonly IAccountService _accountService;
+        private readonly IRepository<ApplicationUserOTP> _otpRepository;
+        public AccountController(UserManager<ApplicationUser> userManager , SignInManager<ApplicationUser> signInManager , IEmailSender emailSender , IAccountService accountService , IRepository<ApplicationUserOTP> otpRepository)   
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _accountService = accountService;
+            _otpRepository = otpRepository;
+        }
+        public async Task<IActionResult> Logout()
+        {
+          await _signInManager.SignOutAsync();
+             TempData["success-notification"] = "Logged out successfully.";
+             return RedirectToAction("Index", "Home", new { area = "Customer" });
+       
         }
         [HttpGet]
         public IActionResult Register()
@@ -46,10 +56,12 @@ namespace E_Commerce.Areas.Idintity.Controllers
                 }
                 return View(model);
             }
-            
+
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
             var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = applicationUser.Id, token = token }, Request.Scheme);
-            await _emailSender.SendEmailAsync(applicationUser.Email, "Confirm your email", $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>Click here to confirm your account</a>");
+            //await _emailSender.SendEmailAsync(applicationUser.Email, "Confirm your email", $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>Click here to confirm your account</a>");
+
+            await _accountService.SendEmailAsync(EmailType.ConfirmEmail, $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>Click here to confirm your account</a>", applicationUser);
 
             TempData["success-notification"] = "User created successfully";
             return RedirectToAction("Login");
@@ -120,5 +132,133 @@ namespace E_Commerce.Areas.Idintity.Controllers
             TempData["success-notification"] = $"Welcome back {user.UserName}!";
             return RedirectToAction("Index", "Home" , new { area = "Customer" });
         }
-    }
-    }   
+        [HttpGet]
+        public IActionResult ResendEmailConfirmation()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResendEmailConfirmation(ResendEmailConfirmationVM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+            var user = await _userManager.FindByEmailAsync(model.EmailOrUserName) ??
+                       await _userManager.FindByNameAsync(model.EmailOrUserName);
+            if (user is not null && !user.EmailConfirmed)
+            {
+
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var confirmationLink = Url.Action("ResendConfirmationEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
+                await _accountService.SendEmailAsync(EmailType.ResendConfirmationEmail, $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>Click here to confirm your account</a>", user);
+            }
+
+            TempData["success-notification"] = "If an account with that email or username exists and is not confirmed, a confirmation email has been resent.";
+            return RedirectToAction("Login");
+        }
+        [HttpGet]
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Logic to resend email confirmation
+            var user = await _userManager.FindByEmailAsync(model.EmailOrUserName) ??
+                       await _userManager.FindByNameAsync(model.EmailOrUserName);
+            var userOtpsCount = (await _otpRepository.GetAsync(e => user.Id == e.UserId && e.CreateAt >= DateTime.UtcNow.AddHours(-24))).Count();
+             if (!user.EmailConfirmed)
+                {
+                TempData["error-notification"] = "Please confirm your email before resetting your password.";
+                return RedirectToAction(" ResendEmailConfirmation");
+            }
+            if (user is not null && userOtpsCount < 5)
+            {
+                string otp = new Random().Next(1000, 9999).ToString(); 
+                string msg = $"<h1>Your OTP for password reset is: {otp}. Don't share it</h1>";
+                await _accountService.SendEmailAsync(EmailType.ForgetPassword, msg, user);
+                await _otpRepository.CreateAsync(new()
+                {
+                    UserId = user.Id,
+                    OTP = otp,
+                });
+                await _otpRepository.CommitAsync();
+                TempData["success-notification"] = "Send OTP to your email Successfully.";
+            }
+           else if (userOtpsCount >= 5)
+            {
+                TempData["error-notification"] = "You have exceeded the maximum number of OTP requests. Please try again later.";
+                return RedirectToAction("ForgetPassword");
+            }
+
+            return RedirectToAction("ValidateOTP" , new { applicationUserId = user.Id });
+        }
+        [HttpGet]
+        public IActionResult ValidateOTP(string applicationUserId)
+        {
+            var model = new ValidateOTPVM
+            {
+                ApplicationUserId = applicationUserId
+            };
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ValidateOTP(ValidateOTPVM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByIdAsync(model.ApplicationUserId);
+            if (user is null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid OTP.");
+                return View(model);
+            }
+
+            var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && e.IsValid).OrderBy(e=>e.Id).LastOrDefault();
+            if (otp == null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid OTP.");
+                return View(model);
+            }
+            otp.IsUsed= true;
+            return RedirectToAction("ResetPassword", new { userId = user.Id });
+        }
+        [HttpGet]
+        public IActionResult ResetPassword(string userId)
+        {
+            var model = new ResetPasswordVM
+            {
+                ApplicationUserId = userId
+            };
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+            var user = await _userManager.FindByIdAsync(model.ApplicationUserId);
+            if (user is null)
+            {
+                ModelState.AddModelError(string.Empty, "User not found.");
+                return View(model);
+            }
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+            TempData["success-notification"] = "Your password has been reset successfully. You can now log in with your new password.";
+            return RedirectToAction("Login");
+        }
+        }
+}   
