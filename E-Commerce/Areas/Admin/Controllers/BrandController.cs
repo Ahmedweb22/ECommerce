@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
+
+    [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN} , {SD.ROLE_EMPLOYEE}")]
+
     public class BrandController : Controller
     {
 
@@ -60,6 +64,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             var brand = await _brandRepository.GetOneAsync(e => e.Id == id);
@@ -68,6 +73,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             return View(brand);
         }
         [HttpPost]
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Edit(Brand brand , IFormFile? logo)
         {
             Brand? existingBrand = await _brandRepository.GetOneAsync(e => e.Id == brand.Id , tracking: false);
@@ -98,6 +104,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             TempData["Notification"] = "Brand updated successfully";
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var brand = await _brandRepository.GetOneAsync(e => e.Id == id);

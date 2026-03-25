@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
@@ -29,15 +30,31 @@ namespace E_Commerce
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.LogoutPath = "/Identity/Account/Logout";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.ExpireTimeSpan = TimeSpan.FromDays(14);
+                options.SlidingExpiration = true;
+            });
+
             builder.Services.AddScoped<IRepository<Catgeory>, Repository<Catgeory>>();
             builder.Services.AddScoped<IRepository<Brand>, Repository<Brand>>();
             builder.Services.AddScoped<IRepository<Product>, Repository<Product>>();
             builder.Services.AddScoped<IProductSubImgRepository, ProductSubImgRepository>();    
-                        builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
+            builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
+
 
             builder.Services.AddScoped<IAccountService, AccountService>();
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+
+            builder.Services.AddScoped<IDbInitilizer, DbInitilizer>();
+
+
+         
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -49,9 +66,15 @@ namespace E_Commerce
             }
 
             app.UseHttpsRedirection();
+
+
             app.UseRouting();
 
             app.UseAuthorization();
+
+            var scope = app.Services.CreateScope();
+            var service = scope.ServiceProvider.GetService<IDbInitilizer>();
+            service.Initialize();        
 
             app.MapStaticAssets();
             app.MapControllerRoute(

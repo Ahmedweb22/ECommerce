@@ -72,18 +72,26 @@
                                 class="btn btn-sm btn-outline-primary">
                                     Details
                                 </a>
+                                @if (User.IsInRole(SD.ROLE_ADMIN) || User.IsInRole(SD.ROLE_SUPER_ADMIN))
+                                {
+                                    <a href="/Admin/Category/Edit/@item.Id"
+                                    class="btn btn-sm btn-outline-warning">
+                                        Edit
+                                    </a>
 
-                                <!-- Update -->
-                                <a href="/Admin/Category/Edit/@item.Id"
-                                class="btn btn-sm btn-outline-warning">
-                                    Edit
-                                </a>
-
-                                <!-- Delete -->
-                                <a href="/Admin/Category/Delete/@item.Id"
-                                class="btn btn-sm btn-outline-danger">
-                                    Delete
-                                </a>
+                                    <!-- Delete -->
+                                    <a href="/Admin/Category/Delete/@item.Id"
+                                    class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </a>
+                                }
+                                else
+                                {
+                                    
+                                <td>
+									No Actions Available!!
+                                </td>
+                                }
                             </td>
                         </tr>
                     }

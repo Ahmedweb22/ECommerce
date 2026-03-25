@@ -9,3 +9,4 @@ global using E_Commerce.Repositories;
 global using E_Commerce.Repositories.IRepositories;
 global using E_Commerce.Services;
 global using E_Commerce.Services.IServices;
+global using E_Commerce.Utilities.DbInitialization;

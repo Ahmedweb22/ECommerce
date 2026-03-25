@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
+
+    [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN} , {SD.ROLE_EMPLOYEE}")]
+
     public class CategoryController : Controller
     {
         private IRepository<Catgeory> _repository;
@@ -48,6 +52,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             var category = await _repository.GetOneAsync(e => e.Id == id);
@@ -56,6 +61,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             return View(category);
         }
         [HttpPost]
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Edit(Catgeory catgeory)
         {
 
@@ -67,6 +73,9 @@ namespace E_Commerce.Areas.Admin.Controllers
                 TempData["Notification"] = "Category updated successfully";
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
+
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
                 var category = await  _repository.GetOneAsync(e => e.Id == id);

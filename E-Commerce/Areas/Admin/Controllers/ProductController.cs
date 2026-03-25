@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
+
+    [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN} , {SD.ROLE_EMPLOYEE}")]
+
     public class ProductController : Controller
     {
         private IRepository<Product> _productRepository;
@@ -128,6 +132,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Edit(int id)
         {
             var product = await _productRepository.GetOneAsync(e => e.Id == id);
@@ -145,6 +150,7 @@ namespace E_Commerce.Areas.Admin.Controllers
             });
         }
         [HttpPost]
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Edit(Product product, IFormFile? mainImg, List<IFormFile>? subImgs)
         {
             var PtoductInDB  = await _productRepository.GetOneAsync(p => p.Id == product.Id , tracking: false);
@@ -215,6 +221,7 @@ namespace E_Commerce.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        
         public async Task<IActionResult> DeleteImg([FromRoute] int id, [FromQuery] int productImgId)
         {
             var subImg = await _productSubImgRepository.GetOneAsync(p => p.Id == productImgId);
@@ -231,6 +238,7 @@ namespace E_Commerce.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Edit), new { id });
         }
+        [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _productRepository.GetOneAsync(p => p.Id == id);

@@ -63,6 +63,8 @@ namespace E_Commerce.Areas.Idintity.Controllers
 
             await _accountService.SendEmailAsync(EmailType.ConfirmEmail, $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>Click here to confirm your account</a>", applicationUser);
 
+           await _userManager.AddToRoleAsync(applicationUser, SD.ROLE_CUSTOMER);
+
             TempData["success-notification"] = "User created successfully";
             return RedirectToAction("Login");
         }

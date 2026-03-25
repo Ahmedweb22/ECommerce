@@ -76,17 +76,28 @@
                                     Details
                                 </a>
 
-                                <!-- Update -->
-                                <a href="/Admin/Brand/Edit/@item.Id"
-                                class="btn btn-sm btn-outline-warning">
-                                    Edit
-                                </a>
+                                @if (User.IsInRole(SD.ROLE_ADMIN) || User.IsInRole(SD.ROLE_SUPER_ADMIN))
+                                {
+                                    <!-- Update -->
+                                    <a href="/Admin/Brand/Edit/@item.Id"
+                                    class="btn btn-sm btn-outline-warning">
+                                        Edit
+                                    </a>
 
-                                <!-- Delete -->
-                                <a href="/Admin/Brand/Delete/@item.Id"
-                                class="btn btn-sm btn-outline-danger">
-                                    Delete
-                                </a>
+                                    <!-- Delete -->
+                                    <a href="/Admin/Brand/Delete/@item.Id"
+                                    class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </a>
+                                }
+                                else
+                                {
+
+                                    <td>
+                                        No Actions Available!!
+                                    </td>
+                                }
+
                             </td>
                         </tr>
                     }
