@@ -1,6 +1,8 @@
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Stripe;
+using Product = E_Commerce.Models.Product;
 
 namespace E_Commerce
 {
@@ -44,17 +46,20 @@ namespace E_Commerce
             builder.Services.AddScoped<IRepository<Product>, Repository<Product>>();
             builder.Services.AddScoped<IProductSubImgRepository, ProductSubImgRepository>();    
             builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
+            builder.Services.AddScoped<IRepository<Cart>, Repository<Cart>>();
+             builder.Services.AddScoped<IRepository<Promotion>, Repository<Promotion>>();
 
 
-            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IAccountService, Services.AccountService>();
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
             builder.Services.AddScoped<IDbInitilizer, DbInitilizer>();
 
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
 
-         
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

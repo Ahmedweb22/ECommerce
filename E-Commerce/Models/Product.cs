@@ -6,8 +6,8 @@
         public string Name { get; set; }=string.Empty;
         public string? Description { get; set; }
         public string MainImg { get; set; }=string.Empty;
-        public long Price { get; set; }
-        public long Discount { get; set; }
+        public double Price { get; set; }
+        public double Discount { get; set; }
         public int Quantity { get; set; }
         public double Rate { get; set; }
         public bool Status { get; set; }

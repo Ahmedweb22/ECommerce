@@ -15,8 +15,8 @@ namespace E_Commerce.DataAccess
         public DbSet<Brand> Brands { get; set; } 
         public DbSet<Catgeory> Categories { get; set; } 
             public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
-        public DbSet<E_Commerce.ViewModels.ValidateOTPVM> ValidateOTPVM { get; set; } = default!;
-        public DbSet<E_Commerce.ViewModels.ResetPasswordVM> ResetPasswordVM { get; set; } = default!;
+     public DbSet<Cart> Carts { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
 
 
     }
